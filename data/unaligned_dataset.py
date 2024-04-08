@@ -1,9 +1,10 @@
 import os
+import sys
 from data.base_dataset import BaseDataset, get_transform
 from data.image_folder import make_dataset
 from PIL import Image
 import random
-
+from pathlib import Path
 
 class UnalignedDataset(BaseDataset):
     """
@@ -23,11 +24,18 @@ class UnalignedDataset(BaseDataset):
             opt (Option class) -- stores all the experiment flags; needs to be a subclass of BaseOptions
         """
         BaseDataset.__init__(self, opt)
-        self.dir_A = os.path.join(opt.dataroot, opt.phase + 'A')  # create a path '/path/to/data/trainA'
-        self.dir_B = os.path.join(opt.dataroot, opt.phase + 'B')  # create a path '/path/to/data/trainB'
+        self.tile_folders = sorted(
+            [str(file) for file in Path("/esat/biomeddata/kkontras/r0786880/biopsy_data_filtered").glob('*')])
+        self.image_folders_HE = []
+        self.image_folders_MUC = []
+        for tile_folder in self.tile_folders:
+            image_folders_HE_current = sorted([str(file) for file in Path(tile_folder).glob('*HE*')])
+            self.image_folders_HE.extend(image_folders_HE_current)
+            image_folders_MUC_current = sorted([str(file) for file in Path(tile_folder).glob('*MUC*')])
+            self.image_folders_MUC.extend(image_folders_MUC_current)
+        self.A_paths = sorted([str(file) for directory in self.image_folders_HE for file in Path(directory).glob('*')])
+        self.B_paths = sorted([str(file) for directory in self.image_folders_MUC for file in Path(directory).glob('*')])
 
-        self.A_paths = sorted(make_dataset(self.dir_A, opt.max_dataset_size))   # load images from '/path/to/data/trainA'
-        self.B_paths = sorted(make_dataset(self.dir_B, opt.max_dataset_size))    # load images from '/path/to/data/trainB'
         self.A_size = len(self.A_paths)  # get the size of dataset A
         self.B_size = len(self.B_paths)  # get the size of dataset B
         btoA = self.opt.direction == 'BtoA'
@@ -54,12 +62,27 @@ class UnalignedDataset(BaseDataset):
         else:   # randomize the index for domain B to avoid fixed pairs.
             index_B = random.randint(0, self.B_size - 1)
         B_path = self.B_paths[index_B]
-        A_img = Image.open(A_path).convert('RGB')
-        B_img = Image.open(B_path).convert('RGB')
-        # apply image transformation
-        A = self.transform_A(A_img)
-        B = self.transform_B(B_img)
 
+        try:
+            A_img = Image.open(A_path).convert('RGB')
+            A = self.transform_A(A_img)
+        except OSError as e:
+            print(f"Error: Failed to open or process the image '{A_path}': {e}", file=sys.stderr)
+            index -= 1
+            if index < 0:
+                index =self.A_size-1
+            return self.__getitem__(index)
+        try:
+            B_img = Image.open(B_path).convert('RGB')
+            B = self.transform_B(B_img)
+        except OSError as e:
+            print(f"Error: Failed to open or process the image '{B_path}': {e}", file=sys.stderr)
+            index -= 1
+            if index < 0:
+                index = self.B_size-1
+            return self.__getitem__(index)
+
+        # apply image transformation
         return {'A': A, 'B': B, 'A_paths': A_path, 'B_paths': B_path}
 
     def __len__(self):

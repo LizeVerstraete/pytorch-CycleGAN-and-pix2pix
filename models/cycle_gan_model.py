@@ -74,6 +74,23 @@ class CycleGANModel(BaseModel):
                                         not opt.no_dropout, opt.init_type, opt.init_gain, self.gpu_ids)
         self.netG_B = networks.define_G(opt.output_nc, opt.input_nc, opt.ngf, opt.netG, opt.norm,
                                         not opt.no_dropout, opt.init_type, opt.init_gain, self.gpu_ids)
+        if self.pretrained:
+            # Load the state dictionary
+            state_dict_G_A = torch.load('checkpoints/Boehringer/cyclegan_he2mt.pth')
+            state_dict_G_B = torch.load('checkpoints/Boehringer/cyclegan_mt2he.pth')
+
+            # Remove the "module." prefix from the keys
+            new_state_dict_G_A = {}
+            new_state_dict_G_B = {}
+            for key, value in state_dict_G_A.items():
+                new_key = key.replace("model.", "module.model.")
+                new_state_dict_G_A[new_key] = value
+            for key, value in state_dict_G_B.items():
+                new_key = key.replace("model.", "module.model.")
+                new_state_dict_G_B[new_key] = value
+
+            self.netG_A.load_state_dict(new_state_dict_G_A)
+            self.netG_B.load_state_dict(new_state_dict_G_B)
 
         if self.isTrain:  # define discriminators
             self.netD_A = networks.define_D(opt.output_nc, opt.ndf, opt.netD,
