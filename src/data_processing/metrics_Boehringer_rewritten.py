@@ -39,7 +39,7 @@ def unpaired_lab_WB(img_set1, img_set2):
     for img1 in img_set1:
         index += 1
         img1 = img1.cpu().numpy()
-        img2 = img_set2[index].cpu().numpy()
+        img2 = img_set2[index].detach().cpu().numpy()
         hist_1 += get_hist(img1)
         hist_2 += get_hist(img2)
         lab1 = color.rgb2lab(img1)
