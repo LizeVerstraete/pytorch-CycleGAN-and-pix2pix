@@ -3,7 +3,7 @@ import logging
 from collections import defaultdict
 import numpy as np
 
-from src.data_processing.metrics_Boehringer_rewritten import unpaired_lab_WB
+from src.data_processing.metrics_Boehringer_rewritten import unpaired_lab_WB, SSIM
 
 
 class General_Evaluator:
@@ -63,20 +63,20 @@ class General_Evaluator:
         metrics["WB"] = unpaired_lab_WB(self.labels,self.predictions)
 
         #CALCULATE SSIM
-        # index=-1
-        # sum_ssims = 0
+        index=-1
+        sum_ssims = 0
         # avg_hists = []
         # hist_labels = np.zeros((3,256))
         # hist_predictions = np.zeros((3,256))
-        #
-        # for label in self.labels:
-        #     index += 1
-        #     label = label.cpu().numpy()
-        #     prediction = self.predictions[index].cpu().numpy()
-        #     sum_ssims += SSIM(label,prediction)
-        #     #sum_ssims += ssim(cv2.cvtColor(label,cv2.COLOR_BGR2GRAY),cv2.cvtColor(prediction,cv2.COLOR_BGR2GRAY), multichannel=False)
-        # avg_ssim = sum_ssims/(index+1)
-        # metrics["SSIM"] = avg_ssim
+
+        for label in self.labels:
+            index += 1
+            label = label.cpu().numpy()
+            prediction = self.predictions[index].cpu().numpy()
+            sum_ssims += SSIM(label,prediction)
+            #sum_ssims += ssim(cv2.cvtColor(label,cv2.COLOR_BGR2GRAY),cv2.cvtColor(prediction,cv2.COLOR_BGR2GRAY), multichannel=False)
+        avg_ssim = sum_ssims/(index+1)
+        metrics["SSIM"] = avg_ssim
 
         #CALCULATE FID -> doesn't work yet
         #metrics["FID"] = calculate_fid(self.predictions, self.labels, 32)

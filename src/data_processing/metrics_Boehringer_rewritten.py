@@ -2,6 +2,7 @@ import os
 import zipfile
 from glob import glob
 from random import random
+from skimage.metrics import structural_similarity as ssim
 
 import numpy as np
 from cleanfid.utils import ResizeDataset
@@ -11,7 +12,21 @@ from scipy.stats import wasserstein_distance
 import torch
 from cleanfid.features import build_feature_extractor, get_reference_statistics
 from tqdm import tqdm
+import cv2
 
+
+def SSIM(img1: np.ndarray, img2: np.ndarray) -> np.float64:
+    """
+    Calcualte SSIM between two images. Convert to grayscale before.
+
+    :param img1: Image 1 in RGB color space
+    :param img2: Image 2 in RGB color space
+    :return: Computed SSIM
+    """
+
+    img1 = cv2.cvtColor(img1, cv2.COLOR_RGB2GRAY)
+    img2 = cv2.cvtColor(img2, cv2.COLOR_RGB2GRAY)
+    return ssim(img1, img2, multichannel=False)
 
 def normalize_pop(h1: np.array, step=1):
     return h1 / np.sum(h1) / step
