@@ -13,6 +13,7 @@ import torch
 from cleanfid.features import build_feature_extractor, get_reference_statistics
 from tqdm import tqdm
 import cv2
+from cleanfid.utils import *
 
 
 def SSIM(img1: np.ndarray, img2: np.ndarray) -> np.float64:

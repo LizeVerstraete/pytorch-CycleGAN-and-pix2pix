@@ -145,7 +145,7 @@ class CycleGANModel(BaseModel):
         We also call loss_D.backward() to calculate the gradients.
         """
         # Real
-        pred_real = netD(real)
+        pred_real = netD(real) #returns Tensor: (1,1,30,30) representing the prediction whether each patch of the image is predicted as being real by the discriminator
         loss_D_real = self.criterionGAN(pred_real, True)
         # Fake
         pred_fake = netD(fake.detach())
@@ -209,3 +209,15 @@ class CycleGANModel(BaseModel):
         self.backward_D_A()      # calculate gradients for D_A
         self.backward_D_B()      # calculate graidents for D_B
         self.optimizer_D.step()  # update D_A and D_B's weights
+
+    def function_for_evaluation(self):
+        self.forward()  # compute fake images and reconstruction images.
+        # G_A and G_B
+        self.set_requires_grad([self.netD_A, self.netD_B], False)  # Ds require no gradients when optimizing Gs
+        self.optimizer_G.zero_grad()  # set G_A and G_B's gradients to zero
+        self.backward_G()  # calculate gradients for G_A and G_B
+        # D_A and D_B
+        self.set_requires_grad([self.netD_A, self.netD_B], True)
+        self.optimizer_D.zero_grad()  # set D_A and D_B's gradients to zero
+        self.backward_D_A()  # calculate gradients for D_A
+        self.backward_D_B()  # calculate graidents for D_B

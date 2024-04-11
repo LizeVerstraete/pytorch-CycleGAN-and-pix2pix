@@ -72,7 +72,7 @@ class General_Evaluator:
         for label in self.labels:
             index += 1
             label = label.cpu().numpy()
-            prediction = self.predictions[index].cpu().numpy()
+            prediction = self.predictions[index].cpu().detach().numpy()
             sum_ssims += SSIM(label,prediction)
             #sum_ssims += ssim(cv2.cvtColor(label,cv2.COLOR_BGR2GRAY),cv2.cvtColor(prediction,cv2.COLOR_BGR2GRAY), multichannel=False)
         avg_ssim = sum_ssims/(index+1)
