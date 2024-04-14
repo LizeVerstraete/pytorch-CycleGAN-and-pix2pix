@@ -10,10 +10,13 @@
 Now you can use the dataset class by specifying flag '--dataset_mode dummy'.
 See our template dataset class 'template_dataset.py' for more details.
 """
+import os
 import importlib
 import torch.utils.data
+from torch.utils.data import Subset, Dataset, DataLoader
 from data.base_dataset import BaseDataset
-
+from sklearn.model_selection import train_test_split
+from pathlib import Path
 
 def find_dataset_using_name(dataset_name):
     """Import the module "data/[dataset_name]_dataset.py".
@@ -62,7 +65,7 @@ def create_dataset(opt):
 class CustomDatasetDataLoader():
     """Wrapper class of Dataset class that performs multi-threaded data loading"""
 
-    def __init__(self, opt):
+    def __init__(self, opt, test_size = 0.1, val_size = 0.1):
         """Initialize this class
 
         Step 1: create a dataset instance given the name [dataset_mode]
@@ -71,12 +74,47 @@ class CustomDatasetDataLoader():
         self.opt = opt
         dataset_class = find_dataset_using_name(opt.dataset_mode)
         self.dataset = dataset_class(opt)
+        patients = sorted([str(Path(patient_folder).stem) for patient_folder in self.dataset.image_folders_HE])
+        train_patients, test_val_patients = train_test_split(patients, test_size=test_size + val_size, random_state=42)
+        val_patients, test_patients = train_test_split(test_val_patients, test_size=test_size / (test_size + val_size),
+                                                       random_state=42)
+        train_indices = []
+        test_indices = []
+        val_indices = []
+        for i in range(len(self.dataset)):
+            patient = os.path.basename(os.path.dirname(self.dataset.A_paths[i]))
+            #patient = str(Path(self.dataset.A_paths[i]).stem)
+            if patient in train_patients:
+                train_indices.append(i)
+            elif patient in test_patients:
+                test_indices.append(i)
+            elif patient in val_patients:
+                val_indices.append(i)
+
+        g = torch.Generator()
+        g.manual_seed(109)
         print("dataset [%s] was created" % type(self.dataset).__name__)
-        self.dataloader = torch.utils.data.DataLoader(
-            self.dataset,
-            batch_size=opt.batch_size,
-            shuffle=not opt.serial_batches,
-            num_workers=int(opt.num_threads))
+        if opt.isTrain:
+            self.dataset = Subset(self.dataset, train_indices)
+            self.dataloader = torch.utils.data.DataLoader(
+                self.dataset,
+                batch_size=opt.batch_size,
+                shuffle=not opt.serial_batches,
+                num_workers=int(opt.num_threads))
+        elif opt.isTest:
+            self.dataset = Subset(self.dataset, test_indices)
+            self.dataloader = torch.utils.data.DataLoader(
+                self.dataset,
+                batch_size=opt.batch_size,
+                shuffle=not opt.serial_batches,
+                num_workers=int(opt.num_threads))
+        else:
+            self.dataset = Subset(self.dataset, val_indices)
+            self.dataloader = torch.utils.data.DataLoader(
+                self.dataset,
+                batch_size=opt.batch_size,
+                shuffle=not opt.serial_batches,
+                num_workers=int(opt.num_threads))
 
     def load_data(self):
         return self

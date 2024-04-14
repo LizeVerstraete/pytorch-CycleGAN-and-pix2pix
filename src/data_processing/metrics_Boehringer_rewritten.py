@@ -15,6 +15,13 @@ from tqdm import tqdm
 import cv2
 from cleanfid.utils import *
 
+def PSNR(img1,img2):
+    img1 = cv2.cvtColor(img1, cv2.COLOR_RGB2GRAY)
+    img2 = cv2.cvtColor(img2, cv2.COLOR_RGB2GRAY)
+    mse = np.mean(np.square(img1 - img2))
+    max = np.max(img1)
+    psnr = 10 * np.log10((max ** 2) / mse)
+    return psnr
 
 def SSIM(img1: np.ndarray, img2: np.ndarray) -> np.float64:
     """
