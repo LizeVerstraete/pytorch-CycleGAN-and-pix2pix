@@ -25,7 +25,7 @@ class UnalignedDataset(BaseDataset):
         """
         BaseDataset.__init__(self, opt)
         self.tile_folders = sorted(
-            [str(file) for file in Path("/esat/biomeddata/kkontras/r0786880/biopsy_data_filtered").glob('*')])
+            [str(file) for file in Path("/esat/biomeddata/kkontras/r0786880/biopsy_data_filtered_aligned_small").glob('*')])
         self.image_folders_HE = []
         self.image_folders_MUC = []
         for tile_folder in self.tile_folders:
@@ -57,10 +57,14 @@ class UnalignedDataset(BaseDataset):
             B_paths (str)    -- image paths
         """
         A_path = self.A_paths[index % self.A_size]  # make sure index is within then range
-        if self.opt.serial_batches:   # make sure index is within then range
-            index_B = index % self.B_size
-        else:   # randomize the index for domain B to avoid fixed pairs.
-            index_B = random.randint(0, self.B_size - 1)
+        try:
+            if self.opt.aligned:
+                index_B = index
+        except:
+            if self.opt.serial_batches:  # make sure index is within then range
+                index_B = index % self.B_size
+            else:  # randomize the index for domain B to avoid fixed pairs.
+                index_B = random.randint(0, self.B_size - 1)
         B_path = self.B_paths[index_B]
 
         try:
@@ -68,6 +72,7 @@ class UnalignedDataset(BaseDataset):
             A = self.transform_A(A_img)
         except OSError as e:
             print(f"Error: Failed to open or process the image '{A_path}': {e}", file=sys.stderr)
+            print("Now trying with the previous image")
             index -= 1
             if index < 0:
                 index =self.A_size-1
@@ -77,6 +82,7 @@ class UnalignedDataset(BaseDataset):
             B = self.transform_B(B_img)
         except OSError as e:
             print(f"Error: Failed to open or process the image '{B_path}': {e}", file=sys.stderr)
+            print("Now trying with the previous image")
             index -= 1
             if index < 0:
                 index = self.B_size-1

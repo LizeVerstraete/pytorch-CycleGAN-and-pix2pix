@@ -3,6 +3,7 @@ import zipfile
 from glob import glob
 from random import random
 from skimage.metrics import structural_similarity as ssim
+from pathlib import Path
 
 import numpy as np
 from cleanfid.utils import ResizeDataset
@@ -82,7 +83,43 @@ def unpaired_lab_WB(img_set1, img_set2):
         wasserstein_distance(normalize_pop(chr2[0]), normalize_pop(chr2[1])))
     return lab_wd
 
+def unpaired_lab_WD_paths(p1: str, p2: str):
+    """
+    Computes LAB WD for unpaired distributions.
 
+    :param path1: Directory containing first distribution images.
+    :param path2: Directory containing second distribution images.
+    """
+
+    step = 1
+    bins = np.arange(-128, 128, step)
+    chr1 = np.zeros((2, len(bins) - 1))
+    chr2 = chr1.copy()
+    av_hists = []
+    for i, path in enumerate([p1, p2]):
+        img_files = get_img_files(path)
+        hist = np.zeros((3, 256))
+        for img_file in img_files:
+            hist += get_hist(cv2.imread(img_file, 1))
+            lab = color.rgb2lab(Image.open(img_file).convert("RGB"))
+            chr1_values = np.clip(np.ravel(lab[:, :, 1]), -128, 127)
+            chr2_values = np.clip(np.ravel(lab[:, :, 2]), -128, 127)
+            chr1[i] += np.histogram(chr1_values, bins=bins)[0]
+            chr2[i] += np.histogram(chr2_values, bins=bins)[0]
+        av_hists.append(hist / len(img_files))
+
+        if chr1[i].sum() == 0 or chr2[i].sum() == 0:
+            print(f'population {i + 1} is not yet gathered')
+            return None
+
+    lab_wd = max(
+        wasserstein_distance(normalize_pop(chr1[0]), normalize_pop(chr1[1])),
+        wasserstein_distance(normalize_pop(chr2[0]), normalize_pop(chr2[1])))
+
+    return lab_wd
+
+def get_img_files(path: str):
+    return sorted([str(file) for file in Path(path).glob('*')])
 
 def calculate_fid(paths: list, batch_size: int, device: str, dims: int = 512,
                   num_workers: int = 4):
