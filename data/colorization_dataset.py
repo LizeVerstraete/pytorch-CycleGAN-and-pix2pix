@@ -8,13 +8,13 @@ import torchvision.transforms as transforms
 
 
 class ColorizationDataset(BaseDataset):
-    """This dataset class can load a set of natural images in RGB, and convert RGB format into (L, ab) pairs in Lab color space.
+    """This dataset_aligned class can load a set of natural images in RGB, and convert RGB format into (L, ab) pairs in Lab color space.
 
-    This dataset is required by pix2pix-based colorization model ('--model colorization')
+    This dataset_aligned is required by pix2pix-based colorization model ('--model colorization')
     """
     @staticmethod
     def modify_commandline_options(parser, is_train):
-        """Add new dataset-specific options, and rewrite default values for existing options.
+        """Add new dataset_aligned-specific options, and rewrite default values for existing options.
 
         Parameters:
             parser          -- original option parser
@@ -30,7 +30,7 @@ class ColorizationDataset(BaseDataset):
         return parser
 
     def __init__(self, opt):
-        """Initialize this dataset class.
+        """Initialize this dataset_aligned class.
 
         Parameters:
             opt (Option class) -- stores all the experiment flags; needs to be a subclass of BaseOptions
@@ -64,5 +64,5 @@ class ColorizationDataset(BaseDataset):
         return {'A': A, 'B': B, 'A_paths': path, 'B_paths': path}
 
     def __len__(self):
-        """Return the total number of images in the dataset."""
+        """Return the total number of images in the dataset_aligned."""
         return len(self.AB_paths)

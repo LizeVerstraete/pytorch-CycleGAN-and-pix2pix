@@ -15,9 +15,9 @@ class BaseDataset(data.Dataset, ABC):
 
     To create a subclass, you need to implement the following four functions:
     -- <__init__>:                      initialize the class, first call BaseDataset.__init__(self, opt).
-    -- <__len__>:                       return the size of dataset.
+    -- <__len__>:                       return the size of dataset_aligned.
     -- <__getitem__>:                   get a data point.
-    -- <modify_commandline_options>:    (optionally) add dataset-specific options and set default options.
+    -- <modify_commandline_options>:    (optionally) add dataset_aligned-specific options and set default options.
     """
 
     def __init__(self, opt):
@@ -31,7 +31,7 @@ class BaseDataset(data.Dataset, ABC):
 
     @staticmethod
     def modify_commandline_options(parser, is_train):
-        """Add new dataset-specific options, and rewrite default values for existing options.
+        """Add new dataset_aligned-specific options, and rewrite default values for existing options.
 
         Parameters:
             parser          -- original option parser
@@ -44,7 +44,7 @@ class BaseDataset(data.Dataset, ABC):
 
     @abstractmethod
     def __len__(self):
-        """Return the total number of images in the dataset."""
+        """Return the total number of images in the dataset_aligned."""
         return 0
 
     @abstractmethod

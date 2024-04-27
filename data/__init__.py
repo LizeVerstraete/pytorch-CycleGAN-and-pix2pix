@@ -47,7 +47,7 @@ def get_option_setter(dataset_name):
     return dataset_class.modify_commandline_options
 
 
-def create_dataset(opt):
+def create_dataset(opt, data_folder):
     """Create a dataset given the option.
 
     This function wraps the class CustomDatasetDataLoader.
@@ -55,9 +55,9 @@ def create_dataset(opt):
 
     Example:
         >>> from data import create_dataset
-        >>> dataset = create_dataset(opt)
+        >>> dataset = create_dataset(opt,data_folder)
     """
-    data_loader = CustomDatasetDataLoader(opt)
+    data_loader = CustomDatasetDataLoader(opt,data_folder)
     dataset = data_loader.load_data()
     return dataset
 
@@ -65,7 +65,7 @@ def create_dataset(opt):
 class CustomDatasetDataLoader():
     """Wrapper class of Dataset class that performs multi-threaded data loading"""
 
-    def __init__(self, opt, test_size = 0.1, val_size = 0.1):
+    def __init__(self, opt, data_folder, test_size = 0.1, val_size = 0.1):
         """Initialize this class
 
         Step 1: create a dataset instance given the name [dataset_mode]
@@ -73,7 +73,7 @@ class CustomDatasetDataLoader():
         """
         self.opt = opt
         dataset_class = find_dataset_using_name(opt.dataset_mode)
-        self.dataset = dataset_class(opt)
+        self.dataset = dataset_class(opt,data_folder)
         patients = sorted([str(Path(patient_folder).stem) for patient_folder in self.dataset.image_folders_HE])
         train_patients, test_val_patients = train_test_split(patients, test_size=test_size + val_size, random_state=42)
         val_patients, test_patients = train_test_split(test_val_patients, test_size=test_size / (test_size + val_size),

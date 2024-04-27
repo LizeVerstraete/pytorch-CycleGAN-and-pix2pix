@@ -7,9 +7,9 @@ from src.data_processing.metrics_Boehringer_rewritten import unpaired_lab_WB, SS
 
 
 class General_Evaluator:
-    def __init__(self, total_instances: int):
+    def __init__(self, opt,total_instances: int):
         self.total_instances = total_instances
-        self.reset()
+        self.reset(opt)
 
         self.early_stop = False
 
@@ -30,14 +30,14 @@ class General_Evaluator:
     def enable_early_stop(self):
         self.early_stop = True
 
-    def reset(self):
+    def reset(self,opt):
         self.losses = []
         self.SSIMs = []
         self.lab_wds = []
         self.fid_scores = []
-        self.labels = torch.empty(0,256,256,3).cuda()
+        self.labels = torch.empty(0,opt.load_size,opt.load_size,3).cuda()
         self.processed_instances = 0
-        self.predictions = torch.empty(0,256,256,3).cuda()
+        self.predictions = torch.empty(0,opt.load_size,opt.load_size,3).cuda()
 
     def process(self,predictions,label,loss):
         self.processed_instances += len(predictions)

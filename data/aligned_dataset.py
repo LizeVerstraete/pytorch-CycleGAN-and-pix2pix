@@ -5,14 +5,14 @@ from PIL import Image
 
 
 class AlignedDataset(BaseDataset):
-    """A dataset class for paired image dataset.
+    """A dataset_aligned class for paired image dataset_aligned.
 
     It assumes that the directory '/path/to/data/train' contains image pairs in the form of {A,B}.
     During test time, you need to prepare a directory '/path/to/data/test'.
     """
 
     def __init__(self, opt):
-        """Initialize this dataset class.
+        """Initialize this dataset_aligned class.
 
         Parameters:
             opt (Option class) -- stores all the experiment flags; needs to be a subclass of BaseOptions
@@ -56,5 +56,5 @@ class AlignedDataset(BaseDataset):
         return {'A': A, 'B': B, 'A_paths': AB_path, 'B_paths': AB_path}
 
     def __len__(self):
-        """Return the total number of images in the dataset."""
+        """Return the total number of images in the dataset_aligned."""
         return len(self.AB_paths)

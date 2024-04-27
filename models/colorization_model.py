@@ -7,13 +7,13 @@ import numpy as np
 class ColorizationModel(Pix2PixModel):
     """This is a subclass of Pix2PixModel for image colorization (black & white image -> colorful images).
 
-    The model training requires '-dataset_model colorization' dataset.
+    The model training requires '-dataset_model colorization' dataset_aligned.
     It trains a pix2pix model, mapping from L channel to ab channels in Lab color space.
-    By default, the colorization dataset will automatically set '--input_nc 1' and '--output_nc 2'.
+    By default, the colorization dataset_aligned will automatically set '--input_nc 1' and '--output_nc 2'.
     """
     @staticmethod
     def modify_commandline_options(parser, is_train=True):
-        """Add new dataset-specific options, and rewrite default values for existing options.
+        """Add new dataset_aligned-specific options, and rewrite default values for existing options.
 
         Parameters:
             parser          -- original option parser
@@ -22,7 +22,7 @@ class ColorizationModel(Pix2PixModel):
         Returns:
             the modified parser.
 
-        By default, we use 'colorization' dataset for this model.
+        By default, we use 'colorization' dataset_aligned for this model.
         See the original pix2pix paper (https://arxiv.org/pdf/1611.07004.pdf) and colorization results (Figure 9 in the paper)
         """
         Pix2PixModel.modify_commandline_options(parser, is_train)

@@ -35,7 +35,9 @@ def SSIM(img1: np.ndarray, img2: np.ndarray) -> np.float64:
 
     img1 = cv2.cvtColor(img1, cv2.COLOR_RGB2GRAY)
     img2 = cv2.cvtColor(img2, cv2.COLOR_RGB2GRAY)
-    return ssim(img1, img2, multichannel=False)
+    data_range = img1.max() - img1.min()
+    # Compute SSIM with specified data_range
+    return ssim(img1, img2, multichannel=False, data_range=data_range)
 
 def normalize_pop(h1: np.array, step=1):
     return h1 / np.sum(h1) / step
@@ -177,7 +179,7 @@ def get_folder_features(fdir, model=None, num_workers=12, num=None,
                         shuffle=False, seed=0, batch_size=128, device=torch.device("cuda"),
                         mode="clean", custom_fn_resize=None, description="", verbose=True,
                         custom_image_tranform=None):
-    # get all relevant files in the dataset
+    # get all relevant files in the dataset_aligned
     if ".zip" in fdir:
         files = list(set(zipfile.ZipFile(fdir).namelist()))
         # remove the non-image files inside the zip

@@ -50,7 +50,7 @@ class GetData(object):
         for i, o in enumerate(options):
             print("{0}: {1}".format(i, o))
         choice = input("\nPlease enter the number of the "
-                       "dataset above you wish to download:")
+                       "dataset_aligned above you wish to download:")
         return options[int(choice)]
 
     def _download_data(self, dataset_url, save_path):
@@ -79,11 +79,11 @@ class GetData(object):
     def get(self, save_path, dataset=None):
         """
 
-        Download a dataset.
+        Download a dataset_aligned.
 
         Parameters:
             save_path (str) -- A directory to save the data to.
-            dataset (str)   -- (optional). A specific dataset to download.
+            dataset (str)   -- (optional). A specific dataset_aligned to download.
                             Note: this must include the file extension.
                             If None, options will be presented for you
                             to choose from.

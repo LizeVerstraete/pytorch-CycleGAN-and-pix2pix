@@ -8,7 +8,7 @@ from util import segrun, fast_hist, get_scores
 from cityscapes import cityscapes
 
 parser = argparse.ArgumentParser()
-parser.add_argument("--cityscapes_dir", type=str, required=True, help="Path to the original cityscapes dataset")
+parser.add_argument("--cityscapes_dir", type=str, required=True, help="Path to the original cityscapes dataset_aligned")
 parser.add_argument("--result_dir", type=str, required=True, help="Path to the generated images to be evaluated")
 parser.add_argument("--output_dir", type=str, required=True, help="Where to save the evaluation results")
 parser.add_argument("--caffemodel_dir", type=str, default='./scripts/eval_cityscapes/caffemodel/', help="Where the FCN-8s caffemodel stored")

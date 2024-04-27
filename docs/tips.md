@@ -67,7 +67,7 @@ export PYTHONPATH=${PYTHONPATH}:./scripts/eval_cityscapes/
 ```
 Now you can run the following command to evaluate your predictions:
 ```bash
-python ./scripts/eval_cityscapes/evaluate.py --cityscapes_dir /path/to/original/cityscapes/dataset/ --result_dir /path/to/your/predictions/ --output_dir /path/to/output/directory/
+python ./scripts/eval_cityscapes/evaluate.py --cityscapes_dir /path/to/original/cityscapes/dataset_aligned/ --result_dir /path/to/your/predictions/ --output_dir /path/to/output/directory/
 ```
 Images stored under `--result_dir` should contain your model predictions on the Cityscapes **validation** split, and have the original Cityscapes naming convention (e.g., `frankfurt_000001_038418_leftImg8bit.png`). The script will output a text file under `--output_dir` containing the metric.
 

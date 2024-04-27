@@ -36,7 +36,7 @@ if __name__ == '__main__':
     import argparse
     parser = argparse.ArgumentParser()
     parser.add_argument(
-        '--dataset-path',
+        '--dataset_aligned-path',
         dest='dataset_path',
         help='Which folder to process (it should have subfolders testA, testB, trainA and trainB'
     )

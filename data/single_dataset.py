@@ -4,13 +4,13 @@ from PIL import Image
 
 
 class SingleDataset(BaseDataset):
-    """This dataset class can load a set of images specified by the path --dataroot /path/to/data.
+    """This dataset_aligned class can load a set of images specified by the path --dataroot /path/to/data.
 
     It can be used for generating CycleGAN results only for one side with the model option '-model test'.
     """
 
     def __init__(self, opt):
-        """Initialize this dataset class.
+        """Initialize this dataset_aligned class.
 
         Parameters:
             opt (Option class) -- stores all the experiment flags; needs to be a subclass of BaseOptions
@@ -36,5 +36,5 @@ class SingleDataset(BaseDataset):
         return {'A': A, 'A_paths': A_path}
 
     def __len__(self):
-        """Return the total number of images in the dataset."""
+        """Return the total number of images in the dataset_aligned."""
         return len(self.A_paths)

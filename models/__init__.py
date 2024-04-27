@@ -3,7 +3,7 @@
 To add a custom model class called 'dummy', you need to add a file called 'dummy_model.py' and define a subclass DummyModel inherited from BaseModel.
 You need to implement the following five functions:
     -- <__init__>:                      initialize the class; first call BaseModel.__init__(self, opt).
-    -- <set_input>:                     unpack data from dataset and apply preprocessing.
+    -- <set_input>:                     unpack data from dataset_aligned and apply preprocessing.
     -- <forward>:                       produce intermediate results.
     -- <optimize_parameters>:           calculate loss, gradients, and update network weights.
     -- <modify_commandline_options>:    (optionally) add model-specific options and set default options.

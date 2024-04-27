@@ -10,7 +10,7 @@ class CycleGANModel(BaseModel):
     """
     This class implements the CycleGAN model, for learning image-to-image translation without paired data.
 
-    The model training requires '--dataset_mode unaligned' dataset.
+    The model training requires '--dataset_mode unaligned' dataset_aligned.
     By default, it uses a '--netG resnet_9blocks' ResNet generator,
     a '--netD basic' discriminator (PatchGAN introduced by pix2pix),
     and a least-square GANs objective ('--gan_mode lsgan').
@@ -19,7 +19,7 @@ class CycleGANModel(BaseModel):
     """
     @staticmethod
     def modify_commandline_options(parser, is_train=True):
-        """Add new dataset-specific options, and rewrite default values for existing options.
+        """Add new dataset_aligned-specific options, and rewrite default values for existing options.
 
         Parameters:
             parser          -- original option parser
@@ -42,7 +42,6 @@ class CycleGANModel(BaseModel):
             parser.add_argument('--lambda_A', type=float, default=10.0, help='weight for cycle loss (A -> B -> A)')
             parser.add_argument('--lambda_B', type=float, default=10.0, help='weight for cycle loss (B -> A -> B)')
             parser.add_argument('--lambda_identity', type=float, default=0.5, help='use identity mapping. Setting lambda_identity other than 0 has an effect of scaling the weight of the identity mapping loss. For example, if the weight of the identity loss should be 10 times smaller than the weight of the reconstruction loss, please set lambda_identity = 0.1')
-
         return parser
 
     def __init__(self, opt):

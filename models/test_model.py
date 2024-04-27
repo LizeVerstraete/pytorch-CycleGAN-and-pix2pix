@@ -10,7 +10,7 @@ class TestModel(BaseModel):
     """
     @staticmethod
     def modify_commandline_options(parser, is_train=True):
-        """Add new dataset-specific options, and rewrite default values for existing options.
+        """Add new dataset_aligned-specific options, and rewrite default values for existing options.
 
         Parameters:
             parser          -- original option parser
@@ -55,7 +55,7 @@ class TestModel(BaseModel):
         Parameters:
             input: a dictionary that contains the data itself and its metadata information.
 
-        We need to use 'single_dataset' dataset mode. It only load images from one domain.
+        We need to use 'single_dataset' dataset_aligned mode. It only load images from one domain.
         """
         self.real = input['A'].to(self.device)
         self.image_paths = input['A_paths']

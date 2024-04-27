@@ -10,7 +10,7 @@ class BaseOptions():
     """This class defines options used during both training and test time.
 
     It also implements several helper functions such as parsing, printing, and saving the options.
-    It also gathers additional options defined in <modify_commandline_options> functions in both dataset class and model class.
+    It also gathers additional options defined in <modify_commandline_options> functions in both dataset_aligned class and model class.
     """
 
     def __init__(self):
@@ -38,7 +38,7 @@ class BaseOptions():
         parser.add_argument('--init_gain', type=float, default=0.02, help='scaling factor for normal, xavier and orthogonal.')
         parser.add_argument('--no_dropout', action='store_true', help='no dropout for the generator')
         #parser.add_argument('--phase', type=str, default='val', help='train, val, test, etc')
-        # dataset parameters
+        # dataset_aligned parameters
         parser.add_argument('--dataset_mode', type=str, default='unaligned', help='chooses how datasets are loaded. [unaligned | aligned | single | colorization]')
         parser.add_argument('--direction', type=str, default='AtoB', help='AtoB or BtoA')
         parser.add_argument('--serial_batches', action='store_true', help='if true, takes images in order to make batches, otherwise takes them randomly')
@@ -46,7 +46,7 @@ class BaseOptions():
         parser.add_argument('--batch_size', type=int, default=1, help='input batch size')
         parser.add_argument('--load_size', type=int, default=286, help='scale images to this size')
         parser.add_argument('--crop_size', type=int, default=256, help='then crop to this size')
-        parser.add_argument('--max_dataset_size', type=int, default=float("inf"), help='Maximum number of samples allowed per dataset. If the dataset directory contains more than max_dataset_size, only a subset is loaded.')
+        parser.add_argument('--max_dataset_size', type=int, default=float("inf"), help='Maximum number of samples allowed per dataset_aligned. If the dataset_aligned directory contains more than max_dataset_size, only a subset is loaded.')
         parser.add_argument('--preprocess', type=str, default='resize_and_crop', help='scaling and cropping of images at load time [resize_and_crop | crop | scale_width | scale_width_and_crop | none]')
         parser.add_argument('--no_flip', action='store_true', help='if specified, do not flip the images for data augmentation')
         parser.add_argument('--display_winsize', type=int, default=256, help='display window size for both visdom and HTML')
@@ -65,9 +65,9 @@ class BaseOptions():
 
     def gather_options(self):
         """Initialize our parser with basic options(only once).
-        Add additional model-specific and dataset-specific options.
+        Add additional model-specific and dataset_aligned-specific options.
         These options are defined in the <modify_commandline_options> function
-        in model and dataset classes.
+        in model and dataset_aligned classes.
         """
         if not self.initialized:  # check if it has been initialized
             parser = argparse.ArgumentParser(formatter_class=argparse.ArgumentDefaultsHelpFormatter)
@@ -82,7 +82,7 @@ class BaseOptions():
         parser = model_option_setter(parser, self.isTrain)
         opt, _ = parser.parse_known_args()  # parse again with new defaults
 
-        # modify dataset-related parser options
+        # modify dataset_aligned-related parser options
         dataset_name = opt.dataset_mode
         dataset_option_setter = data.get_option_setter(dataset_name)
         parser = dataset_option_setter(parser, self.isTrain)

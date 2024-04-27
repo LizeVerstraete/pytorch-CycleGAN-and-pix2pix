@@ -210,7 +210,7 @@ class Visualizer():
                 webpage.add_images(ims, txts, links, width=self.win_size)
             webpage.save()
 
-    def plot_current_losses(self, epoch, counter_ratio, losses):
+    def plot_current_losses(self, epoch, counter_ratio, losses, name="Train losses"):
         """display the current losses on visdom display: dictionary of error labels and values
 
         Parameters:
@@ -222,20 +222,21 @@ class Visualizer():
             self.plot_data = {'X': [], 'Y': [], 'legend': list(losses.keys())}
         self.plot_data['X'].append(epoch + counter_ratio)
         self.plot_data['Y'].append([losses[k] for k in self.plot_data['legend']])
-        try:
-            self.vis.line(
-                X=np.stack([np.array(self.plot_data['X'])] * len(self.plot_data['legend']), 1),
-                Y=np.array(self.plot_data['Y']),
-                opts={
-                    'title': self.name + ' loss over time',
-                    'legend': self.plot_data['legend'],
-                    'xlabel': 'epoch',
-                    'ylabel': 'loss'},
-                win=self.display_id)
-        except VisdomExceptionBase:
-            self.create_visdom_connections()
+        if self.display_id > 0:
+            try:
+                self.vis.line(
+                    X=np.stack([np.array(self.plot_data['X'])] * len(self.plot_data['legend']), 1),
+                    Y=np.array(self.plot_data['Y']),
+                    opts={
+                        'title': self.name + ' loss over time',
+                        'legend': self.plot_data['legend'],
+                        'xlabel': 'epoch',
+                        'ylabel': 'loss'},
+                    win=self.display_id)
+            except VisdomExceptionBase:
+                self.create_visdom_connections()
         if self.use_wandb:
-            self.wandb_run.log(losses)
+            self.wandb_run.log({name: losses})
 
     # losses: same format as |losses| of plot_current_losses
     def print_current_losses(self, epoch, iters, losses, t_comp, t_data):

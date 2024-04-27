@@ -3,7 +3,7 @@ import glob
 from PIL import Image
 
 help_msg = """
-The dataset can be downloaded from https://cityscapes-dataset.com.
+The dataset_aligned can be downloaded from https://cityscapes-dataset.com.
 Please download the datasets [gtFine_trainvaltest.zip] and [leftImg8bit_trainvaltest.zip] and unzip them.
 gtFine contains the semantics segmentations. Use --gtFine_dir to specify the path to the unzipped gtFine_trainvaltest directory. 
 leftImg8bit contains the dashcam photographs. Use --leftImg8bit_dir to specify the path to the unzipped leftImg8bit_trainvaltest directory. 

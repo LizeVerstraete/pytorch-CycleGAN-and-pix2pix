@@ -1,13 +1,13 @@
 """Dataset class template
 
 This module provides a template for users to implement custom datasets.
-You can specify '--dataset_mode template' to use this dataset.
+You can specify '--dataset_mode template' to use this dataset_aligned.
 The class name should be consistent with both the filename and its dataset_mode option.
 The filename should be <dataset_mode>_dataset.py
 The class name should be <Dataset_mode>Dataset.py
 You need to implement the following functions:
-    -- <modify_commandline_options>:　Add dataset-specific options and rewrite default values for existing options.
-    -- <__init__>: Initialize this dataset class.
+    -- <modify_commandline_options>:　Add dataset_aligned-specific options and rewrite default values for existing options.
+    -- <__init__>: Initialize this dataset_aligned class.
     -- <__getitem__>: Return a data point and its metadata information.
     -- <__len__>: Return the number of images.
 """
@@ -17,10 +17,10 @@ from data.base_dataset import BaseDataset, get_transform
 
 
 class TemplateDataset(BaseDataset):
-    """A template dataset class for you to implement custom datasets."""
+    """A template dataset_aligned class for you to implement custom datasets."""
     @staticmethod
     def modify_commandline_options(parser, is_train):
-        """Add new dataset-specific options, and rewrite default values for existing options.
+        """Add new dataset_aligned-specific options, and rewrite default values for existing options.
 
         Parameters:
             parser          -- original option parser
@@ -29,24 +29,24 @@ class TemplateDataset(BaseDataset):
         Returns:
             the modified parser.
         """
-        parser.add_argument('--new_dataset_option', type=float, default=1.0, help='new dataset option')
-        parser.set_defaults(max_dataset_size=10, new_dataset_option=2.0)  # specify dataset-specific default values
+        parser.add_argument('--new_dataset_option', type=float, default=1.0, help='new dataset_aligned option')
+        parser.set_defaults(max_dataset_size=10, new_dataset_option=2.0)  # specify dataset_aligned-specific default values
         return parser
 
     def __init__(self, opt):
-        """Initialize this dataset class.
+        """Initialize this dataset_aligned class.
 
         Parameters:
             opt (Option class) -- stores all the experiment flags; needs to be a subclass of BaseOptions
 
         A few things can be done here.
         - save the options (have been done in BaseDataset)
-        - get image paths and meta information of the dataset.
+        - get image paths and meta information of the dataset_aligned.
         - define the image transformation.
         """
-        # save the option and dataset root
+        # save the option and dataset_aligned root
         BaseDataset.__init__(self, opt)
-        # get the image paths of your dataset;
+        # get the image paths of your dataset_aligned;
         self.image_paths = []  # You can call sorted(make_dataset(self.root, opt.max_dataset_size)) to get all the image paths under the directory self.root
         # define the default transform function. You can use <base_dataset.get_transform>; You can also define your custom transform function
         self.transform = get_transform(opt)

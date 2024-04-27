@@ -8,24 +8,24 @@ from pathlib import Path
 
 class UnalignedDataset(BaseDataset):
     """
-    This dataset class can load unaligned/unpaired datasets.
+    This dataset_aligned class can load unaligned/unpaired datasets.
 
     It requires two directories to host training images from domain A '/path/to/data/trainA'
     and from domain B '/path/to/data/trainB' respectively.
-    You can train the model with the dataset flag '--dataroot /path/to/data'.
+    You can train the model with the dataset_aligned flag '--dataroot /path/to/data'.
     Similarly, you need to prepare two directories:
     '/path/to/data/testA' and '/path/to/data/testB' during test time.
     """
 
-    def __init__(self, opt):
-        """Initialize this dataset class.
+    def __init__(self, opt, data_folder):
+        """Initialize this dataset_aligned class.
 
         Parameters:
             opt (Option class) -- stores all the experiment flags; needs to be a subclass of BaseOptions
         """
         BaseDataset.__init__(self, opt)
         self.tile_folders = sorted(
-            [str(file) for file in Path("/esat/biomeddata/kkontras/r0786880/biopsy_data_filtered_aligned_small").glob('*')])
+            [str(file) for file in Path(data_folder).glob('*')])
         self.image_folders_HE = []
         self.image_folders_MUC = []
         for tile_folder in self.tile_folders:
@@ -36,8 +36,8 @@ class UnalignedDataset(BaseDataset):
         self.A_paths = sorted([str(file) for directory in self.image_folders_HE for file in Path(directory).glob('*')])
         self.B_paths = sorted([str(file) for directory in self.image_folders_MUC for file in Path(directory).glob('*')])
 
-        self.A_size = len(self.A_paths)  # get the size of dataset A
-        self.B_size = len(self.B_paths)  # get the size of dataset B
+        self.A_size = len(self.A_paths)  # get the size of dataset_aligned A
+        self.B_size = len(self.B_paths)  # get the size of dataset_aligned B
         btoA = self.opt.direction == 'BtoA'
         input_nc = self.opt.output_nc if btoA else self.opt.input_nc       # get the number of channels of input image
         output_nc = self.opt.input_nc if btoA else self.opt.output_nc      # get the number of channels of output image
@@ -92,7 +92,7 @@ class UnalignedDataset(BaseDataset):
         return {'A': A, 'B': B, 'A_paths': A_path, 'B_paths': B_path}
 
     def __len__(self):
-        """Return the total number of images in the dataset.
+        """Return the total number of images in the dataset_aligned.
 
         As we have two datasets with potentially different number of images,
         we take a maximum of

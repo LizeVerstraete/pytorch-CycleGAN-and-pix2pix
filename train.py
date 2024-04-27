@@ -29,8 +29,8 @@ from agents.helpers.Evaluator import General_Evaluator
 
 if __name__ == '__main__':
     opt = TrainOptions().parse()   # get training options
-    dataset = create_dataset(opt)  # create a dataset given opt.dataset_mode and other options
-    dataset_size = len(dataset)    # get the number of images in the dataset.
+    dataset = create_dataset(opt)  # create a dataset_aligned given opt.dataset_mode and other options
+    dataset_size = len(dataset)    # get the number of images in the dataset_aligned.
     print('The number of training images = %d' % dataset_size)
 
     model = create_model(opt)      # create a model given opt.model and other options
@@ -44,8 +44,8 @@ if __name__ == '__main__':
         visualizer.reset()              # reset the visualizer: make sure it saves the results to HTML at least once every epoch
         model.update_learning_rate()    # update learning rates in the beginning of every epoch.
 
-        evaluator_A = General_Evaluator(dataset_size)
-        evaluator_A.reset()
+        evaluator_A = General_Evaluator(opt,dataset_size)
+        evaluator_A.reset(opt)
 
         predictions_A = torch.empty(0, 3, 256, 256).cuda()
         predictions_B = torch.empty(0, 3, 256, 256).cuda()
@@ -59,7 +59,7 @@ if __name__ == '__main__':
 
             total_iters += opt.batch_size
             epoch_iter += opt.batch_size
-            model.set_input(data)         # unpack data from dataset and apply preprocessing
+            model.set_input(data)         # unpack data from dataset_aligned and apply preprocessing
             model.optimize_parameters()   # calculate loss functions, get gradients, update network weights
 
             if total_iters % opt.display_freq == 0:   # display images on visdom and save images to a HTML file
