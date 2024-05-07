@@ -28,16 +28,26 @@ class UnalignedDataset(BaseDataset):
             [str(file) for file in Path(data_folder).glob('*')])
         self.image_folders_HE = []
         self.image_folders_MUC = []
+
         for tile_folder in self.tile_folders:
             image_folders_HE_current = sorted([str(file) for file in Path(tile_folder).glob('*HE*')])
             self.image_folders_HE.extend(image_folders_HE_current)
             image_folders_MUC_current = sorted([str(file) for file in Path(tile_folder).glob('*MUC*')])
             self.image_folders_MUC.extend(image_folders_MUC_current)
+        try:
+            max_patients = opt.max_patients
+            print(f'use subset of {max_patients} patients')
+            self.image_folders_HE = self.image_folders_HE[:max_patients]
+            self.image_folders_MUC = self.image_folders_MUC[:max_patients]
+        except:
+            print('use all patients')
         self.A_paths = sorted([str(file) for directory in self.image_folders_HE for file in Path(directory).glob('*')])
         self.B_paths = sorted([str(file) for directory in self.image_folders_MUC for file in Path(directory).glob('*')])
 
         self.A_size = len(self.A_paths)  # get the size of dataset_aligned A
+        print("#HE: ", self.A_size)
         self.B_size = len(self.B_paths)  # get the size of dataset_aligned B
+        print("#IHC: ", self.B_size)
         btoA = self.opt.direction == 'BtoA'
         input_nc = self.opt.output_nc if btoA else self.opt.input_nc       # get the number of channels of input image
         output_nc = self.opt.input_nc if btoA else self.opt.output_nc      # get the number of channels of output image
@@ -60,6 +70,10 @@ class UnalignedDataset(BaseDataset):
         try:
             if self.opt.aligned:
                 index_B = index
+            elif self.opt.serial_batches:  # make sure index is within then range
+                index_B = index % self.B_size
+            else:  # randomize the index for domain B to avoid fixed pairs.
+                index_B = random.randint(0, self.B_size - 1)
         except:
             if self.opt.serial_batches:  # make sure index is within then range
                 index_B = index % self.B_size
@@ -95,6 +109,6 @@ class UnalignedDataset(BaseDataset):
         """Return the total number of images in the dataset_aligned.
 
         As we have two datasets with potentially different number of images,
-        we take a maximum of
+        we take a maximum of the two sets
         """
         return max(self.A_size, self.B_size)

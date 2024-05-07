@@ -210,6 +210,10 @@ class Visualizer():
                 webpage.add_images(ims, txts, links, width=self.win_size)
             webpage.save()
 
+    def print_logs(self, name, variable):
+        if self.use_wandb:
+            self.wandb_run.log({name: variable})
+
     def plot_current_losses(self, epoch, counter_ratio, losses, name="Train losses"):
         """display the current losses on visdom display: dictionary of error labels and values
 

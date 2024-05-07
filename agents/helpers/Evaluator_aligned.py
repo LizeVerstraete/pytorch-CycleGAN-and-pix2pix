@@ -2,8 +2,9 @@ import torch
 import logging
 from collections import defaultdict
 import numpy as np
-
+from sklearn.metrics import mean_squared_error, mean_absolute_error
 from src.data_processing.metrics_Boehringer_rewritten import unpaired_lab_WB, SSIM, PSNR
+from src.data_processing.FID import calculate_fid_given_labels_and_preds
 
 
 class General_Evaluator:
@@ -15,6 +16,7 @@ class General_Evaluator:
 
         self.best_acc = 0.0
         self.best_loss = 0.0
+        self.opt = opt
 
     def set_best(self, best_acc, best_loss):
         self.best_acc = best_acc
@@ -60,21 +62,28 @@ class General_Evaluator:
     def evaluate(self):
         metrics = defaultdict(dict)
         #CALCULATE WB
-        metrics["WB"] = unpaired_lab_WB(self.labels,self.predictions)
+        metrics["WD"] = unpaired_lab_WB(self.labels,self.predictions)
+        #metrics["FID"] = calculate_fid_given_labels_and_preds(self.labels,self.predictions,self.opt.batch_size,torch.device('cuda:{}'.format(self.opt.gpu_ids[0])) if self.opt.gpu_ids else torch.device('cpu'),2048,1)
 
         #CALCULATE SSIM and PSNR
         index=-1
         sum_ssims = 0
         sum_psnr = 0
+        sum_mse = 0
+        sum_mae = 0
 
         for label in self.labels:
             index += 1
             label = label.cpu().numpy()
             prediction = self.predictions[index].cpu().detach().numpy()
             sum_ssims += SSIM(label,prediction)
-            sum_psnr = PSNR(label, prediction)
+            sum_psnr += PSNR(label, prediction)
+            sum_mse += mean_squared_error(label.flatten(),prediction.flatten())
+            sum_mae += mean_absolute_error(label.flatten(),prediction.flatten())
+        metrics['MSE'] = sum_mse/(index+1)
         metrics["SSIM"] = sum_ssims/(index+1)
         metrics["PSNR"] = sum_psnr/(index+1)
+        metrics["MAE"] = sum_mae/(index+1)
 
         #CALCULATE FID -> doesn't work yet
         #metrics["FID"] = calculate_fid(self.predictions, self.labels, 32)
