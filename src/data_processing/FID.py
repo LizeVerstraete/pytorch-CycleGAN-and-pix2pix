@@ -2,6 +2,9 @@
 
 import numpy as np
 import torch
+import numpy as np
+import tensorflow as tf
+from scipy.linalg import sqrtm
 import torchvision.transforms as TF
 from PIL import Image
 from scipy import linalg
@@ -218,3 +221,47 @@ def split_images(ndarray):
         # Append the extracted image to the list
         images_list.append(image)
     return images_list
+
+
+
+# Load InceptionV3 model
+def load_inception_model():
+    base_model = tf.keras.applications.InceptionV3(include_top=False, pooling='avg', input_shape=(299, 299, 3))
+    return base_model
+
+# Resize images to 299x299 (required by InceptionV3)
+def preprocess_images(images):
+    return tf.image.resize(images, (299, 299)).numpy()
+
+# Calculate the FID
+def calculate_fid(real_images, generated_images):
+    # Preprocess images
+    real_images = preprocess_images(real_images)
+    generated_images = preprocess_images(generated_images)
+
+    # Scale images to [-1, 1]
+    real_images = (real_images / 127.5) - 1
+    generated_images = (generated_images / 127.5) - 1
+
+    # Load model
+    model = load_inception_model()
+
+    # Get features
+    real_features = model.predict(real_images)
+    generated_features = model.predict(generated_images)
+
+    # Calculate mean and covariance of features
+    mu_real, sigma_real = real_features.mean(axis=0), np.cov(real_features, rowvar=False)
+    mu_generated, sigma_generated = generated_features.mean(axis=0), np.cov(generated_features, rowvar=False)
+
+    # Calculate the Frechet distance
+    ssdiff = np.sum((mu_real - mu_generated) ** 2.0)
+    covmean, _ = sqrtm(sigma_real.dot(sigma_generated), disp=False)
+
+    # Check and correct imaginary component from sqrtm
+    if np.iscomplexobj(covmean):
+        covmean = covmean.real
+
+    fid = ssdiff + np.trace(sigma_real + sigma_generated - 2.0 * covmean)
+
+    return fid

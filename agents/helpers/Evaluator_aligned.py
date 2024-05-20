@@ -37,15 +37,19 @@ class General_Evaluator:
         self.SSIMs = []
         self.lab_wds = []
         self.fid_scores = []
-        self.labels = torch.empty(0,opt.load_size,opt.load_size,3).cuda()
+        self.labels = torch.empty(0,opt.load_size,opt.load_size,3).cpu()
         self.processed_instances = 0
-        self.predictions = torch.empty(0,opt.load_size,opt.load_size,3).cuda()
+        self.predictions = torch.empty(0,opt.load_size,opt.load_size,3).cpu()
+        self.originals = torch.empty(0,opt.load_size,opt.load_size,3).cpu()
 
-    def process(self,predictions,label,loss):
-        self.processed_instances += len(predictions)
+
+    def process(self,prediction,label,original,loss):
+        self.processed_instances += len(prediction)
         self.losses.append(loss)
-        self.labels = torch.cat((self.labels,label),dim=0)
-        self.predictions = torch.cat((self.predictions,predictions),dim=0)
+        self.labels = torch.cat((self.labels,label.cpu()),dim=0)
+        self.predictions = torch.cat((self.predictions,prediction.cpu()),dim=0)
+        self.originals = torch.cat((self.originals,original.cpu()),dim=0)
+
 
     def mean_batch_loss(self):
         if len(self.losses)==0:
@@ -62,28 +66,34 @@ class General_Evaluator:
     def evaluate(self):
         metrics = defaultdict(dict)
         #CALCULATE WB
-        metrics["WD"] = unpaired_lab_WB(self.labels,self.predictions)
+        #metrics["WD"] = unpaired_lab_WB(self.labels,self.predictions)
+        metrics["WD"] = unpaired_lab_WB(self.labels.reshape(-1, 412, 3).unsqueeze(0),self.predictions.reshape(-1, 412, 3).unsqueeze(0))
+
         #metrics["FID"] = calculate_fid_given_labels_and_preds(self.labels,self.predictions,self.opt.batch_size,torch.device('cuda:{}'.format(self.opt.gpu_ids[0])) if self.opt.gpu_ids else torch.device('cpu'),2048,1)
 
+        metrics["SSIM"] = SSIM(self.originals.reshape(-1, 412, 3).detach().numpy(),self.predictions.reshape(-1, 412, 3).detach().numpy())
+        metrics["MSE"] = mean_squared_error(self.labels.reshape(-1, 412, 3).detach().numpy().flatten(),self.predictions.reshape(-1, 412, 3).detach().numpy().flatten())
+        metrics["MAE"] = mean_absolute_error(self.labels.reshape(-1, 412, 3).detach().numpy().flatten(),self.predictions.reshape(-1, 412, 3).detach().numpy().flatten())
+        metrics["PSNR"] = PSNR(self.labels.reshape(-1, 412, 3).detach().numpy(), self.predictions.reshape(-1, 412, 3).detach().numpy())
         #CALCULATE SSIM and PSNR
         index=-1
-        sum_ssims = 0
-        sum_psnr = 0
-        sum_mse = 0
-        sum_mae = 0
+        #sum_ssims = 0
+        #sum_psnr = 0
+        #sum_mse = 0
+        #sum_mae = 0
 
-        for label in self.labels:
-            index += 1
-            label = label.cpu().numpy()
-            prediction = self.predictions[index].cpu().detach().numpy()
-            sum_ssims += SSIM(label,prediction)
-            sum_psnr += PSNR(label, prediction)
-            sum_mse += mean_squared_error(label.flatten(),prediction.flatten())
-            sum_mae += mean_absolute_error(label.flatten(),prediction.flatten())
-        metrics['MSE'] = sum_mse/(index+1)
-        metrics["SSIM"] = sum_ssims/(index+1)
-        metrics["PSNR"] = sum_psnr/(index+1)
-        metrics["MAE"] = sum_mae/(index+1)
+        # for label in self.labels:
+        #     index += 1
+        #     label = label.cpu().numpy()
+        #     prediction = self.predictions[index].cpu().detach().numpy()
+        #     sum_ssims += SSIM(label,prediction)
+        #     sum_psnr += PSNR(label, prediction)
+        #     sum_mse += mean_squared_error(label.flatten(),prediction.flatten())
+        #     sum_mae += mean_absolute_error(label.flatten(),prediction.flatten())
+        # metrics['MSE'] = sum_mse/(index+1)
+        # metrics["SSIM"] = sum_ssims/(index+1)
+        # metrics["PSNR"] = sum_psnr/(index+1)
+        # metrics["MAE"] = sum_mae/(index+1)
 
         #CALCULATE FID -> doesn't work yet
         #metrics["FID"] = calculate_fid(self.predictions, self.labels, 32)
