@@ -63,18 +63,18 @@ class General_Evaluator:
 
         return dict(mean_batch_loss), message
 
-    def evaluate(self):
+    def evaluate(self,opt):
         metrics = defaultdict(dict)
         #CALCULATE WB
         #metrics["WD"] = unpaired_lab_WB(self.labels,self.predictions)
-        metrics["WD"] = unpaired_lab_WB(self.labels.reshape(-1, 412, 3).unsqueeze(0),self.predictions.reshape(-1, 412, 3).unsqueeze(0))
+        #metrics["WD"] = unpaired_lab_WB(self.labels.reshape(-1, 412, 3).unsqueeze(0),self.predictions.reshape(-1, 412, 3).unsqueeze(0))
 
         #metrics["FID"] = calculate_fid_given_labels_and_preds(self.labels,self.predictions,self.opt.batch_size,torch.device('cuda:{}'.format(self.opt.gpu_ids[0])) if self.opt.gpu_ids else torch.device('cpu'),2048,1)
 
-        metrics["SSIM"] = SSIM(self.originals.reshape(-1, 412, 3).detach().numpy(),self.predictions.reshape(-1, 412, 3).detach().numpy())
-        metrics["MSE"] = mean_squared_error(self.labels.reshape(-1, 412, 3).detach().numpy().flatten(),self.predictions.reshape(-1, 412, 3).detach().numpy().flatten())
-        metrics["MAE"] = mean_absolute_error(self.labels.reshape(-1, 412, 3).detach().numpy().flatten(),self.predictions.reshape(-1, 412, 3).detach().numpy().flatten())
-        metrics["PSNR"] = PSNR(self.labels.reshape(-1, 412, 3).detach().numpy(), self.predictions.reshape(-1, 412, 3).detach().numpy())
+        metrics["SSIM"] = SSIM(self.originals.reshape(-1, opt.load_size, 3).detach().numpy(),self.predictions.reshape(-1, opt.load_size, 3).detach().numpy())
+        metrics["MSE"] = mean_squared_error(self.labels.reshape(-1, opt.load_size, 3).detach().numpy().flatten(),self.predictions.reshape(-1, opt.load_size, 3).detach().numpy().flatten())
+        metrics["MAE"] = mean_absolute_error(self.labels.reshape(-1, opt.load_size, 3).detach().numpy().flatten(),self.predictions.reshape(-1, opt.load_size, 3).detach().numpy().flatten())
+        metrics["PSNR"] = PSNR(self.labels.reshape(-1, opt.load_size, 3).detach().numpy(), self.predictions.reshape(-1, opt.load_size, 3).detach().numpy())
         #CALCULATE SSIM and PSNR
         index=-1
         #sum_ssims = 0
@@ -99,9 +99,9 @@ class General_Evaluator:
         #metrics["FID"] = calculate_fid(self.predictions, self.labels, 32)
         return metrics
 
-    def is_best(self, metrics = None, best_logs=None):
+    def is_best(self,opt, metrics = None, best_logs=None):
         if metrics is None:
-            metrics = self.evaluate()
+            metrics = self.evaluate(opt)
 
         # Flag if its saved don't save it again on $save_every
         not_saved = True

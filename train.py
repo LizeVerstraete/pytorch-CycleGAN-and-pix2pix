@@ -76,7 +76,7 @@ if __name__ == '__main__':
                 predictions_B = torch.cat((predictions_B, model.fake_B), dim=0)
                 labels_A = torch.cat((labels_A, model.real_A), dim=0)
                 labels_B = torch.cat((labels_B, model.real_B), dim=0)
-                print(evaluator_A.evaluate())
+                print(evaluator_A.evaluate(opt))
                 if opt.display_id > 0:
                     visualizer.plot_current_losses(epoch, float(epoch_iter) / dataset_size, losses)
 
@@ -87,7 +87,7 @@ if __name__ == '__main__':
 
             iter_data_time = time.time()
 
-        evaluator_A.evaluate()
+        evaluator_A.evaluate(opt)
 
         if epoch % opt.save_epoch_freq == 0:              # cache our model every <save_epoch_freq> epochs
             print('saving the model at the end of epoch %d, iters %d' % (epoch, total_iters))

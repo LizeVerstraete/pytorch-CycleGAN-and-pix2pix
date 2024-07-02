@@ -30,10 +30,10 @@ class General_Evaluator:
         self.predictions = torch.cat((self.predictions,prediction.cpu()),dim=0)
         self.originals = torch.cat((self.originals,original.cpu()),dim=0)
 
-    def evaluate(self):
+    def evaluate(self,opt):
         metrics = defaultdict(dict)
-        #CALCULATE WB
-        metrics["WD"] = unpaired_lab_WB(self.labels.reshape(-1, 412, 3).unsqueeze(0),self.predictions.reshape(-1, 412, 3).unsqueeze(0))
+        #CALCULATE WD
+        metrics["WD"] = unpaired_lab_WB(self.labels.reshape(-1, opt.load_size, 3).unsqueeze(0),self.predictions.reshape(-1, opt.load_size, 3).unsqueeze(0))
 
         #CALCULATE FID
         #metrics["FID"] = calculate_fid_given_labels_and_preds(self.labels,self.predictions,self.opt.batch_size,torch.device('cuda:{}'.format(self.opt.gpu_ids[0])) if self.opt.gpu_ids else torch.device('cpu'),2048,80)

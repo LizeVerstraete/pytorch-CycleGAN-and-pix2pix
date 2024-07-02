@@ -9,5 +9,5 @@ RequestMemory  = 40G
 RequestWalltime = 604700
 Request_GPUs   = 1
 NiceUser = True
-Requirements = ( GPUs_GlobalMemoryMb > 12500)
+Requirements = ( GPUs_GlobalMemoryMb > 26240)
 queue

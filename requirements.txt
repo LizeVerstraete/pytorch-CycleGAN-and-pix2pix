@@ -3,7 +3,6 @@ certifi==2024.2.2
 charset-normalizer==2.0.12
 clean-fid==0.1.35
 click==8.0.4
-configparser==5.2.0
 contextvars==2.4
 cycler==0.11.0
 dataclasses==0.8
@@ -14,7 +13,6 @@ dominate==2.9.1
 gitdb==4.0.9
 GitPython==3.1.18
 idna==3.6
-imageio==2.15.0
 immutables==0.19
 importlib-metadata==4.8.3
 importlib-resources==5.4.0

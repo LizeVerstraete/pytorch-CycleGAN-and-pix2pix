@@ -196,6 +196,56 @@ class CycleGANModel(BaseModel):
         self.loss_G = self.loss_G_A + self.loss_G_B + self.loss_cycle_A + self.loss_cycle_B + self.loss_idt_A + self.loss_idt_B
         self.loss_G.backward()
 
+    def losses(self):
+        """Calculate the loss for generators G_A and G_B"""
+        lambda_idt = self.opt.lambda_identity
+        lambda_A = self.opt.lambda_A
+        lambda_B = self.opt.lambda_B
+        # Identity loss
+        if lambda_idt > 0:
+            # G_A should be identity if real_B is fed: ||G_A(B) - B||
+            #summary(self.netG_A,(3,256,256),depth=15)
+            self.idt_A = self.netG_A(self.real_B)
+            self.loss_idt_A = self.criterionIdt(self.idt_A, self.real_B) * lambda_B * lambda_idt
+            # G_B should be identity if real_A is fed: ||G_B(A) - A||
+            self.idt_B = self.netG_B(self.real_A)
+            self.loss_idt_B = self.criterionIdt(self.idt_B, self.real_A) * lambda_A * lambda_idt
+        else:
+            self.loss_idt_A = 0
+            self.loss_idt_B = 0
+
+        # GAN loss D_A(G_A(A))
+        self.loss_G_A = self.criterionGAN(self.netD_A(self.fake_B), True)
+        # GAN loss D_B(G_B(B))
+        self.loss_G_B = self.criterionGAN(self.netD_B(self.fake_A), True)
+        # Forward cycle loss || G_B(G_A(A)) - A||
+        self.loss_cycle_A = self.criterionCycle(self.rec_A, self.real_A) * lambda_A
+        # Backward cycle loss || G_A(G_B(B)) - B||
+        self.loss_cycle_B = self.criterionCycle(self.rec_B, self.real_B) * lambda_B
+        # combined loss and calculate gradients
+        self.loss_G = self.loss_G_A + self.loss_G_B + self.loss_cycle_A + self.loss_cycle_B + self.loss_idt_A + self.loss_idt_B
+
+        pred_real_B = self.netD_A(self.real_B) #returns Tensor: (batch size,1,30,30) representing the prediction whether each patch of the image is predicted as being real by the discriminator
+        loss_D_real_B = self.criterionGAN(pred_real_B, True)
+        # Fake
+        pred_fake_B = self.netD_A(self.fake_B.detach())
+        loss_D_fake_B = self.criterionGAN(pred_fake_B, False)
+        # Combined loss and calculate gradients
+        self.loss_D_A = (loss_D_real_B + loss_D_fake_B) * 0.5
+
+        pred_real_A = self.netD_B(self.real_A) #returns Tensor: (batch size,1,30,30) representing the prediction whether each patch of the image is predicted as being real by the discriminator
+        loss_D_real_A = self.criterionGAN(pred_real_A, True)
+        # Fake
+        pred_fake_A = self.netD_B(self.fake_A.detach())
+        loss_D_fake_A = self.criterionGAN(pred_fake_A, False)
+        # Combined loss and calculate gradients
+        self.loss_D_B = (loss_D_real_A + loss_D_fake_A) * 0.5
+
+    def cycleA_loss(self):
+        """Calculate the loss for generators G_A and G_B"""
+        lambda_A = self.opt.lambda_A
+        self.loss_cycle_A = self.criterionCycle(self.rec_A, self.real_A) * lambda_A
+
     def optimize_parameters(self):
         """Calculate losses, gradients, and update network weights; called in every training iteration"""
         # forward
@@ -224,3 +274,55 @@ class CycleGANModel(BaseModel):
         self.optimizer_D.zero_grad()  # set D_A and D_B's gradients to zero
         self.backward_D_A()  # calculate gradients for D_A
         self.backward_D_B()  # calculate graidents for D_B
+
+    def function_for_evaluation_no_backward(self):
+        self.forward()  # compute fake images and reconstruction images.
+        # G_A and G_B
+        self.set_requires_grad([self.netD_A, self.netD_B], False)  # Ds require no gradients when optimizing Gs
+        self.optimizer_G.zero_grad()  # set G_A and G_B's gradients to zero
+        lambda_idt = self.opt.lambda_identity
+        lambda_A = self.opt.lambda_A
+        lambda_B = self.opt.lambda_B
+        # Identity loss
+        if lambda_idt > 0:
+            # G_A should be identity if real_B is fed: ||G_A(B) - B||
+            # summary(self.netG_A,(3,256,256),depth=15)
+            self.idt_A = self.netG_A(self.real_B)
+            self.loss_idt_A = self.criterionIdt(self.idt_A, self.real_B) * lambda_B * lambda_idt
+            # G_B should be identity if real_A is fed: ||G_B(A) - A||
+            self.idt_B = self.netG_B(self.real_A)
+            self.loss_idt_B = self.criterionIdt(self.idt_B, self.real_A) * lambda_A * lambda_idt
+        else:
+            self.loss_idt_A = 0
+            self.loss_idt_B = 0
+
+        # GAN loss D_A(G_A(A))
+        self.loss_G_A = self.criterionGAN(self.netD_A(self.fake_B), True)
+        # GAN loss D_B(G_B(B))
+        self.loss_G_B = self.criterionGAN(self.netD_B(self.fake_A), True)
+        # Forward cycle loss || G_B(G_A(A)) - A||
+        self.loss_cycle_A = self.criterionCycle(self.rec_A, self.real_A) * lambda_A
+        # Backward cycle loss || G_A(G_B(B)) - B||
+        self.loss_cycle_B = self.criterionCycle(self.rec_B, self.real_B) * lambda_B
+        # combined loss and calculate gradients
+        self.loss_G = self.loss_G_A + self.loss_G_B + self.loss_cycle_A + self.loss_cycle_B + self.loss_idt_A + self.loss_idt_B
+
+        self.set_requires_grad([self.netD_A, self.netD_B], True)
+        self.optimizer_D.zero_grad()  # set D_A and D_B's gradients to zero
+        pred_real_B = self.netD_A(
+            self.real_B)  # returns Tensor: (batch size,1,30,30) representing the prediction whether each patch of the image is predicted as being real by the discriminator
+        loss_D_real_B = self.criterionGAN(pred_real_B, True)
+        # Fake
+        pred_fake_B = self.netD_A(self.fake_B.detach())
+        loss_D_fake_B = self.criterionGAN(pred_fake_B, False)
+        # Combined loss and calculate gradients
+        self.loss_D_A = (loss_D_real_B + loss_D_fake_B) * 0.5
+
+        pred_real_A = self.netD_B(
+            self.real_A)  # returns Tensor: (batch size,1,30,30) representing the prediction whether each patch of the image is predicted as being real by the discriminator
+        loss_D_real_A = self.criterionGAN(pred_real_A, True)
+        # Fake
+        pred_fake_A = self.netD_B(self.fake_A.detach())
+        loss_D_fake_A = self.criterionGAN(pred_fake_A, False)
+        # Combined loss and calculate gradients
+        self.loss_D_B = (loss_D_real_A + loss_D_fake_A) * 0.5

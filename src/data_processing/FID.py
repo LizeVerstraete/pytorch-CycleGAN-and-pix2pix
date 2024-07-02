@@ -237,7 +237,7 @@ def preprocess_images(images):
 def calculate_fid(real_images, generated_images):
     # Preprocess images
     real_images = preprocess_images(real_images)
-    generated_images = preprocess_images(generated_images)
+    generated_images = preprocess_images(generated_images.detach())
 
     # Scale images to [-1, 1]
     real_images = (real_images / 127.5) - 1
