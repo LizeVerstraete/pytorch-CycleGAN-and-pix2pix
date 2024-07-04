@@ -27,6 +27,8 @@ def train_loop(original_num_threads,original_batch_size,dataset,total_iters,opt,
             opt.num_threads = original_num_threads
             opt.batch_size = original_batch_size
             opt.aligned = False
+            if opt.use_scheduler and epoch != 1:
+                model.update_learning_rate()
             #print('GPU mem allocated after val: ', torch.cuda.max_memory_allocated())
 
         iter_start_time = time.time()  # timer for computation per iteration
@@ -73,7 +75,7 @@ def val_loop(evaluator,model,dataset,opt,total_iters,visualizer,epoch,epoch_iter
     evaluator.reset(opt)
 
     for i, data in enumerate(dataset):
-        if i>=(total_iters/20000*300)%dataset_size and i<(total_iters/20000*300+300)%dataset_size:
+        if i>=(total_iters/20000*3000)%dataset_size and i<(total_iters/20000*3000+3000)%dataset_size:
             iter_start_time = time.time()  # timer for computation per iteration
             #if i==0:
                 #print('GPU mem allocated before set_input val: ', torch.cuda.max_memory_allocated())
@@ -89,21 +91,21 @@ def val_loop(evaluator,model,dataset,opt,total_iters,visualizer,epoch,epoch_iter
             #    model.function_for_evaluation_no_backward()
             #if i==0:
                 #print('GPU mem allocated after forward val: ', torch.cuda.max_memory_allocated())
-            t_data = iter_start_time - iter_data_time
+            #t_data = iter_start_time - iter_data_time
             total_iters += opt.batch_size
             epoch_iter += opt.batch_size
-            t_comp = (time.time() - iter_start_time) / opt.batch_size
+            #t_comp = (time.time() - iter_start_time) / opt.batch_size
             #if total_iters % 1000 == 0:
             #     visualizer.print_current_losses(epoch, epoch_iter, losses, t_comp, t_data)
             #     visualizer.plot_current_losses(epoch, float(epoch_iter) / dataset_size, losses,name="Test losses")
             sum_losses_epoch += float(getattr(model, 'loss_cycle_A'))
             number_losses += 1
-            iter_data_time = time.time()
+            #iter_data_time = time.time()
             #evaluator.process(model.fake_A.permute(0, 2, 3, 1), model.real_A.permute(0, 2, 3, 1), model.real_B.permute(0, 2, 3, 1),None)
     average_loss_epoch = sum_losses_epoch / number_losses
-    for i in range(0,14):
+    for i in range(0,18):
         last_ten_losses[i] = last_ten_losses[i+1]
-    last_ten_losses[14] = average_loss_epoch
+    last_ten_losses[18] = average_loss_epoch
 
     #if last_ten_losses[0] == min(last_ten_losses) and last_ten_losses.count(last_ten_losses[0]) == 1 and epoch > 1:
     #    stop_training = True
@@ -114,11 +116,11 @@ def val_loop(evaluator,model,dataset,opt,total_iters,visualizer,epoch,epoch_iter
 
     #evaluation = evaluator.evaluate(opt)
 
-    # for i in range(0,14):
+    # for i in range(0,18):
     #     last_ten_evals_FID[i] = last_ten_evals_FID[i+1]
     #     last_ten_evals_WD[i] = last_ten_evals_WD[i+1]
-    # last_ten_evals_FID[14] = evaluation["FID"]
-    # last_ten_evals_WD[14] = evaluation["WD"]
+    # last_ten_evals_FID[18] = evaluation["FID"]
+    # last_ten_evals_WD[18] = evaluation["WD"]
     #
     # print('validation evaluations FID: ', last_ten_evals_FID)
     # print('validation evaluations WD: ', last_ten_evals_WD)

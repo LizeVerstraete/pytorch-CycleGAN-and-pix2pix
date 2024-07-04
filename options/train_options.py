@@ -37,6 +37,7 @@ class TrainOptions(BaseOptions):
         parser.add_argument('--lr_decay_iters', type=int, default=50, help='multiply by a gamma every lr_decay_iters iterations')
         parser.add_argument('--pretrained',action='store_true', help='make use of pretrained model')
         parser.add_argument('--max_patients', type=int, help='maximal number of patients to include in the training')
+        parser.add_argument('--use_scheduler',type=bool,default=False,help='scheduler that decreases quicker than 50 epochs')
         self.isTest = False
         self.isTrain = True
         return parser

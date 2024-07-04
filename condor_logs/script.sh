@@ -18,5 +18,5 @@ else
     echo "We have $num_gpus GPUs"
 fi
 echo "Current PATH: $PATH"
-python /esat/biomeddata/kkontras/r0786880/models/pytorch-CycleGAN-and-pix2pix/whole_training_loop.py --pretrained --dataroot ./train_images/trainA --load_size 412 --preprocess none --num_threads 0 --use_wandb --display_id 0 --name 412npAlllr0002idt1nl4b4 --netD n_layers --n_layers_D 4 --lr 0.0002 --lambda_identity 0.1 --batch_size 4 --save_latest_freq 5000 --print_freq 2500 --display_freq 2500 --save_by_iter --netG resnet_9blocks
+python /esat/biomeddata/kkontras/r0786880/models/pytorch-CycleGAN-and-pix2pix/whole_training_loop.py --dataroot ./train_images/trainA --load_size 256 --num_threads 0 --use_wandb --display_id 0 --name default --netD n_layers --n_layers_D 3 --lr 0.0002 --lambda_identity 0.5 --batch_size 1 --max_patients 25 --save_latest_freq 5000 --print_freq 2500 --display_freq 2500 --save_by_iter --netG resnet_9blocks
 echo "Job finished"

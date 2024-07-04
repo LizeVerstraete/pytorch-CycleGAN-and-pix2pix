@@ -51,9 +51,9 @@ if __name__ == '__main__':
     random.seed(42)
 
     stop_training = False
-    last_fifteen_losses = [100,100,100,100,100,100,100,100,100,100,100,100,100,100,100]
-    last_fifteen_evals_FID = [100,100,100,100,100,100,100,100,100,100,100,100,100,100,100]
-    last_fifteen_evals_WD = [100,100,100,100,100,100,100,100,100,100,100,100,100,100,100]
+    last_fifteen_losses = [100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100]
+    last_fifteen_evals_FID = [100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100]
+    last_fifteen_evals_WD = [100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100]
     best_loss = 100
 
     original_num_threads = opt.num_threads
@@ -73,7 +73,8 @@ if __name__ == '__main__':
         opt.aligned = True
         #test_loop(evaluator_test,evaluations_test,model,dataset_test,opt,original_save_dir,total_iters,epoch)
 
-        model.update_learning_rate()    # update learning rates at the end of every epoch.
+        if not opt.use_scheduler:
+            model.update_learning_rate()    # update learning rates at the end of every epoch.
 
         #ADAPT SUCH THAT ONLY BEST MODEL IS SAVED :)
         # if best_epoch:  # cache our model only if there is an improvement compared to last epoch
